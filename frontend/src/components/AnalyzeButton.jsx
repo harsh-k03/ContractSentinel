@@ -1,6 +1,8 @@
 import { Sparkles, LoaderCircle } from "lucide-react";
 
-export default function AnalyzeButton({ onAnalyze, loading }) {
+export default function AnalyzeButton({ onAnalyze, loading, disabled }) {
+
+  const inactive = loading || disabled;
 
   return (
 
@@ -8,13 +10,13 @@ export default function AnalyzeButton({ onAnalyze, loading }) {
 
       onClick={onAnalyze}
 
-      disabled={loading}
+      disabled={inactive}
 
       className={`
         w-full
         rounded-2xl
         py-4
-        font-bold
+        font-extrabold
         text-lg
         flex
         items-center
@@ -22,13 +24,11 @@ export default function AnalyzeButton({ onAnalyze, loading }) {
         gap-3
         transition-all
         duration-300
-        shadow-lg
-        hover:scale-[1.02]
-        active:scale-[0.98]
+        shadow-md
         ${
-          loading
-            ? "bg-cyan-700 cursor-not-allowed"
-            : "bg-cyan-500 hover:bg-cyan-400 hover:shadow-cyan-500/40 cursor-pointer"
+          inactive
+            ? "bg-sand-300 text-sand-600 cursor-not-allowed"
+            : "bg-hazard text-sand-950 hover:bg-hazard-dark hover:shadow-lg hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
         }
       `}
     >
@@ -52,7 +52,7 @@ export default function AnalyzeButton({ onAnalyze, loading }) {
 
           <Sparkles size={22} />
 
-          Analyze with AI
+          {disabled ? "Upload all three documents to analyze" : "Analyze with AI"}
 
         </>
 
