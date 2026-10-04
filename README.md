@@ -231,9 +231,7 @@ ContractSentinel
 
 # 👨‍💻 Author
 
-**Harsh Kumar**
-
-M.Tech, IIT Roorkee
+[Harsh](https://github.com/harsh-k03)
 
 ---
 
