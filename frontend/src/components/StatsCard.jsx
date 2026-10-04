@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 
-export default function StatsCard({ title, value, color }) {
+export default function StatsCard({ title, value, color, icon: Icon, subtitle, children }) {
   return (
     <motion.div
       initial={{
@@ -18,31 +18,44 @@ export default function StatsCard({ title, value, color }) {
       }}
       whileHover={{
         y: -5,
-        scale: 1.03,
       }}
-      className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-lg hover:border-cyan-500 transition-all duration-300"
+      className="bg-sand-50 border border-sand-300 border-t-4 border-t-sand-700 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-t-hazard transition-colors duration-300"
     >
-      <p className="text-slate-400 text-sm uppercase tracking-wide">
-        {title}
-      </p>
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-sand-600 text-xs font-bold uppercase tracking-wider">
+          {title}
+        </p>
 
-      <motion.h2
-        key={value}
-        initial={{
-          opacity: 0,
-          scale: 0.8,
-        }}
-        animate={{
-          opacity: 1,
-          scale: 1,
-        }}
-        transition={{
-          duration: 0.35,
-        }}
-        className={`text-4xl font-bold mt-4 ${color}`}
-      >
-        {value}
-      </motion.h2>
+        {Icon && <Icon size={18} className="text-sand-500" />}
+      </div>
+
+      {children ? (
+        <div className="mt-4 min-h-10 flex items-center">{children}</div>
+      ) : (
+        <motion.h2
+          key={value}
+          initial={{
+            opacity: 0,
+            scale: 0.8,
+          }}
+          animate={{
+            opacity: 1,
+            scale: 1,
+          }}
+          transition={{
+            duration: 0.35,
+          }}
+          className={`text-4xl font-extrabold mt-3 ${color}`}
+        >
+          {value}
+        </motion.h2>
+      )}
+
+      {subtitle && (
+        <p className="text-sand-500 text-xs mt-2">
+          {subtitle}
+        </p>
+      )}
     </motion.div>
   );
 }
