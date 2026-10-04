@@ -11,15 +11,16 @@ The platform analyzes uploaded documents, highlights procurement risks, generate
 # ✨ Features
 
 - 📄 Upload Construction Contract (PDF)
-- 🧾 Upload Contractor Invoice
-- 📷 Upload Site Progress Photo
-- 🤖 AI Processing Workflow
-- 📊 Procurement Intelligence Dashboard
-- ⚠ Risk Assessment
-- 📝 AI Procurement Recommendation
-- 📥 Download AI Report (PDF)
-- ⚡ FastAPI Backend
-- 🎨 Modern React + Tailwind UI
+- 🧾 Upload Contractor Invoice (PDF or scanned image)
+- 📷 Upload Site Progress Photo (with preview, drag & drop)
+- 🤖 Gemini multimodal analysis of the contract, invoice **and** site photo
+- 📐 Offline rule-based engine (works without an API key): reads the claimed progress from the invoice and the expected progress from the contract schedule using a construction S-curve
+- 📊 Procurement Intelligence Dashboard (claimed vs expected progress, project details)
+- ⚠ Consistent risk assessment (LOW / MEDIUM / HIGH) derived from the progress gap
+- 📝 Risk-based procurement recommendation (Release / Verify / Withhold)
+- 📥 Multi-page PDF audit report with proper text wrapping and page breaks
+- 🏗️ Sand-brown construction theme with safety-stripe accents
+- ⚡ FastAPI backend with input validation and automated tests
 
 ---
 
@@ -40,7 +41,8 @@ The platform analyzes uploaded documents, highlights procurement risks, generate
 - FastAPI
 - Python
 - pdfplumber
-- Google Gemini API (Architecture Ready)
+- Google Gemini API (`google-genai`)
+- pytest
 
 ---
 
@@ -56,13 +58,18 @@ The platform analyzes uploaded documents, highlights procurement risks, generate
         ┌──────────────┼──────────────┐
         │              │              │
         ▼              ▼              ▼
- PDF Extraction   Image Upload    AI Service
-        │
-        ▼
- Structured Procurement Analysis
-        │
-        ▼
- Dashboard + AI Report
+ PDF Extraction   Image Upload   Upload Validation
+        │              │
+        └──────┬───────┘
+               ▼
+     Gemini AI (multimodal) ──fails / no key──► Rule-based Engine
+               │                                     │
+               └──────────────┬──────────────────────┘
+                              ▼
+            Normalised Analysis (risk, recommendation)
+                              │
+                              ▼
+                 Dashboard + PDF Audit Report
 ```
 
 ---
@@ -74,8 +81,10 @@ The platform analyzes uploaded documents, highlights procurement risks, generate
 3. Upload Site Photo
 4. AI Processing
 5. Procurement Dashboard
-6. AI Recommendation
-7. Download Report
+6. Procurement Recommendation
+7. Download PDF Report
+
+Sample documents to try the workflow are included in [`docs/samples`](docs/samples).
 
 ---
 
@@ -105,15 +114,23 @@ The platform analyzes uploaded documents, highlights procurement risks, generate
 
 ---
 
-## AI Procurement Recommendation
+## Findings & Procurement Recommendation
 
 ![Recommendation](docs/screenshots/recommendation.png)
 
 ---
 
-## Generated AI Report
+## Generated PDF Report
 
 ![PDF Report](docs/screenshots/pdf_report.png)
+
+---
+
+## Mobile Layout
+
+<img src="docs/screenshots/mobile.png" alt="Mobile" width="300" />
+
+---
 
 # 🚀 Installation
 
@@ -124,7 +141,25 @@ cd backend
 
 pip install -r requirements.txt
 
+cp .env.example .env   # then add your GEMINI_API_KEY
+
 uvicorn app:app --reload
+```
+
+Without a `GEMINI_API_KEY` the backend still runs and uses the built-in rule-based engine. The dashboard shows which engine produced each analysis.
+
+| Variable | Description |
+| --- | --- |
+| `GEMINI_API_KEY` | Google Gemini API key (optional) |
+| `GEMINI_MODEL` | Preferred Gemini model, tried before the built-in fallbacks (optional) |
+| `ALLOWED_ORIGINS` | Comma-separated CORS origins (optional) |
+
+Run the tests:
+
+```bash
+cd backend
+
+python -m pytest
 ```
 
 ## Frontend
@@ -137,6 +172,17 @@ npm install
 npm run dev
 ```
 
+Set `VITE_API_URL` (see `frontend/.env.example`) if the backend is not running on `http://127.0.0.1:8000`.
+
+---
+
+# 🔌 API
+
+| Method | Endpoint | Description |
+| --- | --- | --- |
+| `GET` | `/health` | Backend status and active analysis engine |
+| `POST` | `/analyze` | Multipart upload of `contract` (PDF), `invoice` (PDF/image) and `photo` (image) |
+
 ---
 
 # 📁 Project Structure
@@ -146,20 +192,26 @@ ContractSentinel
 │
 ├── backend
 │   ├── services
+│   │   ├── analysis_service.py   # rule-based engine + result normalisation
+│   │   ├── document_service.py   # PDF text extraction
+│   │   └── gemini_service.py     # Gemini multimodal analysis
+│   ├── tests
 │   ├── uploads
 │   ├── app.py
 │   └── requirements.txt
 │
 ├── frontend
 │   ├── src
-│   │   ├── assets
 │   │   ├── components
 │   │   ├── pages
-│   │   └── services
+│   │   ├── services
+│   │   └── utils
 │   │
 │   └── package.json
 │
 ├── docs
+│   ├── samples
+│   └── screenshots
 │
 └── README.md
 ```
@@ -168,7 +220,6 @@ ContractSentinel
 
 # 🔮 Future Improvements
 
-- Live Gemini Multimodal Analysis
 - OCR for Scanned Documents
 - Contractor Risk History
 - GIS Integration
